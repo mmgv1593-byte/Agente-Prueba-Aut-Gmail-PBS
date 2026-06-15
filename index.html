@@ -1,0 +1,1168 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Generador de Identidad de Marca Visual</title>
+<style>
+  :root {
+    --primary: #6C63FF;
+    --bg: #0f0f13;
+    --surface: #1a1a24;
+    --surface2: #22222f;
+    --border: #2e2e40;
+    --text: #e8e8f0;
+    --text-muted: #8888aa;
+    --radius: 14px;
+    --radius-sm: 8px;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', system-ui, sans-serif;
+    min-height: 100vh;
+  }
+
+  /* ── HEADER ── */
+  .app-header {
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+    padding: 48px 24px 40px;
+    text-align: center;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .app-header h1 {
+    font-size: clamp(1.8rem, 4vw, 2.8rem);
+    font-weight: 800;
+    letter-spacing: -0.5px;
+    background: linear-gradient(135deg, #fff 30%, #a78bfa);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .app-header p {
+    color: var(--text-muted);
+    margin-top: 8px;
+    font-size: 1rem;
+  }
+
+  /* ── LAYOUT ── */
+  .container {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 32px 20px;
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    gap: 28px;
+    align-items: start;
+  }
+
+  @media (max-width: 900px) {
+    .container { grid-template-columns: 1fr; }
+  }
+
+  /* ── PANEL ── */
+  .panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 28px;
+  }
+
+  .panel-title {
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--primary);
+    margin-bottom: 20px;
+  }
+
+  /* ── FORM ELEMENTS ── */
+  .field { margin-bottom: 20px; }
+
+  label {
+    display: block;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    margin-bottom: 7px;
+    letter-spacing: 0.3px;
+  }
+
+  input[type="text"], select {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 11px 14px;
+    color: var(--text);
+    font-size: 0.92rem;
+    transition: border-color .2s;
+    outline: none;
+    -webkit-appearance: none;
+  }
+
+  input[type="text"]:focus, select:focus {
+    border-color: var(--primary);
+  }
+
+  select option { background: #1a1a24; }
+
+  /* checkboxes */
+  .checkbox-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+
+  .cb-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 9px 12px;
+    cursor: pointer;
+    transition: border-color .2s, background .2s;
+    font-size: 0.82rem;
+  }
+
+  .cb-item:hover { border-color: var(--primary); }
+  .cb-item input { accent-color: var(--primary); width: 15px; height: 15px; }
+  .cb-item.checked { border-color: var(--primary); background: rgba(108,99,255,.1); }
+
+  /* color picker */
+  .color-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  input[type="color"] {
+    width: 48px;
+    height: 48px;
+    border: 2px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 3px;
+    background: var(--surface2);
+    cursor: pointer;
+  }
+
+  .color-hex {
+    font-family: monospace;
+    font-size: 0.9rem;
+    color: var(--text-muted);
+  }
+
+  /* radio */
+  .radio-group {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+
+  .radio-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 9px 12px;
+    cursor: pointer;
+    transition: border-color .2s, background .2s;
+    font-size: 0.82rem;
+  }
+
+  .radio-item:hover { border-color: var(--primary); }
+  .radio-item input { accent-color: var(--primary); }
+  .radio-item.selected { border-color: var(--primary); background: rgba(108,99,255,.1); }
+
+  /* ── MAIN BUTTON ── */
+  .btn-generate {
+    width: 100%;
+    padding: 15px;
+    background: linear-gradient(135deg, #6C63FF, #a78bfa);
+    border: none;
+    border-radius: var(--radius-sm);
+    color: #fff;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    margin-top: 8px;
+    position: relative;
+    overflow: hidden;
+    transition: opacity .2s, transform .1s;
+    letter-spacing: 0.3px;
+  }
+
+  .btn-generate:hover { opacity: 0.92; transform: translateY(-1px); }
+  .btn-generate:active { transform: translateY(0); }
+
+  .btn-generate .btn-spinner {
+    display: none;
+    width: 20px;
+    height: 20px;
+    border: 2px solid rgba(255,255,255,.4);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: spin .7s linear infinite;
+    margin: 0 auto;
+  }
+
+  .btn-generate.loading .btn-text { display: none; }
+  .btn-generate.loading .btn-spinner { display: block; }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ── RESULTS ── */
+  #results { display: none; }
+  #results.visible { display: block; }
+
+  .result-section {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 28px;
+    margin-bottom: 20px;
+  }
+
+  .section-heading {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 22px;
+  }
+
+  .section-heading .icon {
+    width: 34px;
+    height: 34px;
+    background: rgba(108,99,255,.15);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+  }
+
+  .section-heading h2 {
+    font-size: 1rem;
+    font-weight: 700;
+  }
+
+  /* ── PALETTE ── */
+  .palette {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  .palette-swatch {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    transition: transform .2s;
+  }
+
+  .palette-swatch:hover { transform: translateY(-4px); }
+
+  .swatch-circle {
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+    box-shadow: 0 4px 20px rgba(0,0,0,.4);
+    transition: box-shadow .2s;
+    position: relative;
+  }
+
+  .swatch-circle:hover { box-shadow: 0 8px 28px rgba(0,0,0,.5); }
+
+  .swatch-hex {
+    font-family: monospace;
+    font-size: 0.72rem;
+    color: var(--text-muted);
+  }
+
+  .copy-toast {
+    position: fixed;
+    bottom: 32px;
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: #22c55e;
+    color: #fff;
+    padding: 10px 20px;
+    border-radius: 999px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    opacity: 0;
+    transition: opacity .3s, transform .3s;
+    pointer-events: none;
+    z-index: 9999;
+  }
+
+  .copy-toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+
+  /* ── TYPOGRAPHY ── */
+  .font-combos {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+
+  @media (max-width: 600px) { .font-combos { grid-template-columns: 1fr; } }
+
+  .font-card {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 20px;
+  }
+
+  .font-label {
+    font-size: 0.7rem;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 12px;
+  }
+
+  .font-heading-sample {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 6px;
+    line-height: 1.2;
+  }
+
+  .font-body-sample {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    line-height: 1.6;
+  }
+
+  .font-names {
+    margin-top: 12px;
+    font-size: 0.75rem;
+    color: var(--primary);
+    font-family: monospace;
+  }
+
+  /* ── TAGLINES ── */
+  .taglines { display: flex; flex-direction: column; gap: 12px; }
+
+  .tagline-card {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 18px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+    transition: border-color .2s;
+  }
+
+  .tagline-card:hover { border-color: var(--primary); }
+
+  .tagline-text {
+    font-size: 1rem;
+    font-weight: 600;
+    font-style: italic;
+  }
+
+  .tagline-badge {
+    font-size: 0.68rem;
+    background: rgba(108,99,255,.2);
+    color: var(--primary);
+    padding: 4px 10px;
+    border-radius: 999px;
+    white-space: nowrap;
+    font-weight: 600;
+  }
+
+  /* ── PREVIEWS ── */
+  .previews-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+  }
+
+  @media (max-width: 680px) { .previews-grid { grid-template-columns: 1fr; } }
+
+  .preview-wrap {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .preview-label {
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+
+  /* Business card */
+  .biz-card {
+    width: 100%;
+    aspect-ratio: 1.75;
+    border-radius: 12px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 8px 32px rgba(0,0,0,.4);
+  }
+
+  .biz-card .bc-circle {
+    position: absolute;
+    right: -30px;
+    top: -30px;
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    opacity: 0.15;
+  }
+
+  .biz-card .bc-name {
+    font-size: clamp(0.9rem, 2vw, 1.1rem);
+    font-weight: 800;
+    letter-spacing: -0.3px;
+  }
+
+  .biz-card .bc-title {
+    font-size: 0.7rem;
+    opacity: 0.7;
+    margin-top: 3px;
+  }
+
+  .biz-card .bc-contact {
+    font-size: 0.65rem;
+    opacity: 0.65;
+    line-height: 1.7;
+    font-family: monospace;
+  }
+
+  /* LinkedIn Header */
+  .linkedin-header {
+    width: 100%;
+    aspect-ratio: 4;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 8px 32px rgba(0,0,0,.4);
+  }
+
+  .linkedin-header .lh-text {
+    font-size: clamp(0.8rem, 2vw, 1.1rem);
+    font-weight: 800;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    position: relative;
+    z-index: 1;
+  }
+
+  .linkedin-header .lh-shapes {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+  }
+
+  .lh-shape {
+    position: absolute;
+    border-radius: 50%;
+    opacity: 0.2;
+  }
+
+  /* App icon */
+  .app-icon-wrap {
+    display: flex;
+    justify-content: center;
+    padding: 16px;
+    background: var(--surface2);
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border);
+  }
+
+  .app-icon {
+    width: 100px;
+    height: 100px;
+    border-radius: 22px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.2rem;
+    font-weight: 900;
+    box-shadow: 0 8px 32px rgba(0,0,0,.4);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .app-icon .icon-letter {
+    position: relative;
+    z-index: 1;
+  }
+
+  /* Circular seal */
+  .seal-wrap {
+    display: flex;
+    justify-content: center;
+    padding: 16px;
+    background: var(--surface2);
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border);
+  }
+
+  .seal-svg { width: 110px; height: 110px; }
+
+  /* ── ACTION BUTTONS ── */
+  .action-buttons {
+    display: flex;
+    gap: 12px;
+    margin-top: 4px;
+  }
+
+  .btn-secondary {
+    flex: 1;
+    padding: 13px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    color: var(--text);
+    font-size: 0.88rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: border-color .2s, background .2s;
+  }
+
+  .btn-secondary:hover {
+    border-color: var(--primary);
+    background: rgba(108,99,255,.08);
+  }
+
+  /* reveal animation */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .result-section {
+    animation: fadeUp .4s ease both;
+  }
+
+  .result-section:nth-child(2) { animation-delay: .08s; }
+  .result-section:nth-child(3) { animation-delay: .16s; }
+  .result-section:nth-child(4) { animation-delay: .24s; }
+  .result-section:nth-child(5) { animation-delay: .32s; }
+</style>
+</head>
+<body>
+
+<div class="app-header">
+  <h1>Generador de Identidad de Marca Visual</h1>
+  <p>Crea tu identidad visual profesional en segundos con IA creativa</p>
+</div>
+
+<div class="container">
+
+  <!-- ════ INPUTS PANEL ════ -->
+  <div class="panel" style="position:sticky;top:20px;">
+    <div class="panel-title">✦ Datos de tu marca</div>
+
+    <div class="field">
+      <label>Nombre de la empresa</label>
+      <input type="text" id="companyName" placeholder="Ej: NovaTech, Alma Studio…" maxlength="30">
+    </div>
+
+    <div class="field">
+      <label>Industria</label>
+      <select id="industry">
+        <option value="">— Selecciona —</option>
+        <option value="tecnologia">Tecnología & Software</option>
+        <option value="salud">Salud & Bienestar</option>
+        <option value="educacion">Educación & Formación</option>
+        <option value="finanzas">Finanzas & Banca</option>
+        <option value="moda">Moda & Lifestyle</option>
+        <option value="gastronomia">Gastronomía & Food</option>
+        <option value="inmobiliaria">Inmobiliaria</option>
+        <option value="arte">Arte & Diseño</option>
+        <option value="deporte">Deporte & Fitness</option>
+        <option value="viajes">Viajes & Turismo</option>
+        <option value="sustentabilidad">Sustentabilidad</option>
+        <option value="legal">Legal & Consultoría</option>
+      </select>
+    </div>
+
+    <div class="field">
+      <label>Valores de la marca</label>
+      <div class="checkbox-grid" id="valuesGrid">
+        <label class="cb-item" id="cb-innovacion">
+          <input type="checkbox" value="Innovación"> Innovación
+        </label>
+        <label class="cb-item" id="cb-confianza">
+          <input type="checkbox" value="Confianza"> Confianza
+        </label>
+        <label class="cb-item" id="cb-modernidad">
+          <input type="checkbox" value="Modernidad"> Modernidad
+        </label>
+        <label class="cb-item" id="cb-calidez">
+          <input type="checkbox" value="Calidez"> Calidez
+        </label>
+        <label class="cb-item" id="cb-exclusividad">
+          <input type="checkbox" value="Exclusividad"> Exclusividad
+        </label>
+        <label class="cb-item" id="cb-dinamismo">
+          <input type="checkbox" value="Dinamismo"> Dinamismo
+        </label>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Color favorito</label>
+      <div class="color-row">
+        <input type="color" id="favColor" value="#6C63FF">
+        <span class="color-hex" id="colorHexDisplay">#6C63FF</span>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Tono de comunicación</label>
+      <div class="radio-group" id="toneGroup">
+        <label class="radio-item" data-val="Formal">
+          <input type="radio" name="tone" value="Formal"> Formal
+        </label>
+        <label class="radio-item" data-val="Cercano">
+          <input type="radio" name="tone" value="Cercano"> Cercano
+        </label>
+        <label class="radio-item" data-val="Inspiracional">
+          <input type="radio" name="tone" value="Inspiracional"> Inspiracional
+        </label>
+        <label class="radio-item" data-val="Disruptivo">
+          <input type="radio" name="tone" value="Disruptivo"> Disruptivo
+        </label>
+      </div>
+    </div>
+
+    <button class="btn-generate" id="btnGenerate" onclick="generate()">
+      <span class="btn-text">✦ Generar Identidad</span>
+      <div class="btn-spinner"></div>
+    </button>
+
+    <div class="action-buttons" id="actionButtons" style="display:none;margin-top:12px;">
+      <button class="btn-secondary" onclick="regenerate()">↻ Regenerar variación</button>
+      <button class="btn-secondary" onclick="downloadGuide()">⬇ Descargar guía</button>
+    </div>
+  </div>
+
+  <!-- ════ RESULTS ════ -->
+  <div id="results">
+
+    <!-- 1. PALETTE -->
+    <div class="result-section">
+      <div class="section-heading">
+        <div class="icon">🎨</div>
+        <h2>Paleta de Colores</h2>
+      </div>
+      <div class="palette" id="paletteContainer"></div>
+    </div>
+
+    <!-- 2. TYPOGRAPHY -->
+    <div class="result-section">
+      <div class="section-heading">
+        <div class="icon">✍</div>
+        <h2>Tipografías</h2>
+      </div>
+      <div class="font-combos" id="fontCombos"></div>
+    </div>
+
+    <!-- 3. TAGLINES -->
+    <div class="result-section">
+      <div class="section-heading">
+        <div class="icon">💬</div>
+        <h2>Taglines</h2>
+      </div>
+      <div class="taglines" id="taglinesList"></div>
+    </div>
+
+    <!-- 4. PREVIEWS -->
+    <div class="result-section">
+      <div class="section-heading">
+        <div class="icon">👁</div>
+        <h2>Previsualizaciones</h2>
+      </div>
+      <div class="previews-grid">
+        <div class="preview-wrap">
+          <div class="preview-label">Tarjeta de Presentación</div>
+          <div class="biz-card" id="bizCard">
+            <div class="bc-circle" id="bcCircle"></div>
+            <div>
+              <div class="bc-name" id="bcName">Empresa</div>
+              <div class="bc-title" id="bcTitle">Industria</div>
+            </div>
+            <div class="bc-contact" id="bcContact">
+              contact@empresa.com<br>+1 (555) 000-0000<br>www.empresa.com
+            </div>
+          </div>
+        </div>
+
+        <div class="preview-wrap">
+          <div class="preview-label">Header LinkedIn</div>
+          <div class="linkedin-header" id="linkedinHeader">
+            <div class="lh-shapes" id="lhShapes"></div>
+            <div class="lh-text" id="lhText">EMPRESA</div>
+          </div>
+        </div>
+
+        <div class="preview-wrap">
+          <div class="preview-label">Ícono de App</div>
+          <div class="app-icon-wrap">
+            <div class="app-icon" id="appIcon">
+              <span class="icon-letter" id="iconLetter">A</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="preview-wrap">
+          <div class="preview-label">Sello Circular</div>
+          <div class="seal-wrap">
+            <svg class="seal-svg" id="sealSvg" viewBox="0 0 120 120"></svg>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /results -->
+</div><!-- /container -->
+
+<div class="copy-toast" id="copyToast">✓ Copiado al portapapeles</div>
+
+<script>
+/* ══════════════════════════════════════════════
+   STATE
+══════════════════════════════════════════════ */
+let currentPalette = [];
+let currentFonts = [];
+let variationSeed = 0;
+
+/* ══════════════════════════════════════════════
+   UI INTERACTIONS
+══════════════════════════════════════════════ */
+// checkbox visual state
+document.querySelectorAll('.cb-item input').forEach(cb => {
+  cb.addEventListener('change', () => {
+    cb.closest('.cb-item').classList.toggle('checked', cb.checked);
+  });
+});
+
+// radio visual state
+document.querySelectorAll('.radio-item input').forEach(r => {
+  r.addEventListener('change', () => {
+    document.querySelectorAll('.radio-item').forEach(i => i.classList.remove('selected'));
+    r.closest('.radio-item').classList.add('selected');
+  });
+});
+
+// color hex display
+document.getElementById('favColor').addEventListener('input', function() {
+  document.getElementById('colorHexDisplay').textContent = this.value.toUpperCase();
+});
+
+/* ══════════════════════════════════════════════
+   COLOR ENGINE
+══════════════════════════════════════════════ */
+function hexToHsl(hex) {
+  let r = parseInt(hex.slice(1,3),16)/255;
+  let g = parseInt(hex.slice(3,5),16)/255;
+  let b = parseInt(hex.slice(5,7),16)/255;
+  let max = Math.max(r,g,b), min = Math.min(r,g,b);
+  let h,s,l = (max+min)/2;
+  if(max===min){ h=s=0; } else {
+    let d = max-min;
+    s = l>0.5 ? d/(2-max-min) : d/(max+min);
+    switch(max){
+      case r: h=(g-b)/d+(g<b?6:0); break;
+      case g: h=(b-r)/d+2; break;
+      case b: h=(r-g)/d+4; break;
+    }
+    h/=6;
+  }
+  return [h*360, s*100, l*100];
+}
+
+function hslToHex(h,s,l){
+  h/=360; s/=100; l/=100;
+  let r,g,b;
+  if(s===0){ r=g=b=l; } else {
+    const hue2rgb = (p,q,t) => {
+      if(t<0)t+=1; if(t>1)t-=1;
+      if(t<1/6) return p+(q-p)*6*t;
+      if(t<1/2) return q;
+      if(t<2/3) return p+(q-p)*(2/3-t)*6;
+      return p;
+    };
+    const q = l<0.5 ? l*(1+s) : l+s-l*s;
+    const p = 2*l-q;
+    r=hue2rgb(p,q,h+1/3);
+    g=hue2rgb(p,q,h);
+    b=hue2rgb(p,q,h-1/3);
+  }
+  return '#'+[r,g,b].map(x=>Math.round(x*255).toString(16).padStart(2,'0')).join('');
+}
+
+function generatePalette(hex, values, industry, seed) {
+  const [h,s,l] = hexToHsl(hex);
+  const sv = seed % 3; // variation 0,1,2
+  const palette = [];
+
+  // base color slightly adjusted per variation
+  const hAdj = (h + sv * 12) % 360;
+  const sAdj = Math.min(100, s + sv * 5);
+
+  // 1. Primary
+  palette.push(hslToHex(hAdj, sAdj, Math.max(25, Math.min(55, l))));
+
+  // 2. Secondary — complementary shift
+  const shift = values.includes('Modernidad') ? 150 : values.includes('Calidez') ? 30 : 180;
+  palette.push(hslToHex((hAdj + shift + sv*8) % 360, Math.max(40,sAdj-10), 45));
+
+  // 3. Accent — triadic
+  palette.push(hslToHex((hAdj + 120 + sv*5) % 360, Math.min(100,sAdj+10), 55));
+
+  // 4. Light / neutral
+  const lightL = values.includes('Exclusividad') ? 92 : 88;
+  palette.push(hslToHex(hAdj, Math.max(8, sAdj*0.2), lightL - sv*2));
+
+  // 5. Dark
+  const darkL = values.includes('Modernidad') ? 10 : 15;
+  palette.push(hslToHex(hAdj, Math.max(12, sAdj*0.3), darkL + sv*2));
+
+  return palette;
+}
+
+/* ══════════════════════════════════════════════
+   FONT ENGINE
+══════════════════════════════════════════════ */
+const fontCombinations = {
+  innovacion:  [['Space Grotesk','DM Sans'],['Outfit','Inter']],
+  modernidad:  [['Plus Jakarta Sans','Nunito'],['Syne','Manrope']],
+  confianza:   [['Merriweather','Source Sans 3'],['Lora','Open Sans']],
+  calidez:     [['Playfair Display','Lato'],['Cormorant Garamond','Raleway']],
+  exclusividad:[['Cormorant Garamond','Montserrat'],['Bodoni Moda','Jost']],
+  dinamismo:   [['Exo 2','Roboto'],['Righteous','Nunito Sans']],
+  default:     [['Inter','Raleway'],['Poppins','Open Sans']],
+};
+
+function pickFonts(values, seed) {
+  const key = values.length > 0
+    ? values[0].toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'')
+    : 'default';
+  const combos = fontCombinations[key] || fontCombinations['default'];
+  return [combos[seed % combos.length], combos[(seed+1) % combos.length]];
+}
+
+function loadGoogleFont(family) {
+  const id = 'gf-' + family.replace(/\s/g,'');
+  if (document.getElementById(id)) return;
+  const link = document.createElement('link');
+  link.id = id;
+  link.rel = 'stylesheet';
+  link.href = `https://fonts.googleapis.com/css2?family=${encodeURIComponent(family)}:wght@400;600;700;800&display=swap`;
+  document.head.appendChild(link);
+}
+
+/* ══════════════════════════════════════════════
+   TAGLINE ENGINE
+══════════════════════════════════════════════ */
+const taglineTemplates = {
+  Formal: [
+    (n,v) => `${n}. Excelencia en ${v[0]||'calidad'} y ${v[1]||'resultados'}.`,
+    (n,v) => `Construyendo el futuro con ${n} y ${v[0]||'rigor'}.`,
+    (n,v) => `${n}: El estándar de ${v[0]||'confianza'} en su industria.`,
+  ],
+  Cercano: [
+    (n,v) => `En ${n}, creemos en ${v[0]||'las personas'} primero.`,
+    (n,v) => `${n}: donde la ${v[0]||'calidez'} se convierte en valor.`,
+    (n,v) => `Juntos construimos con ${n} y ${v[0]||'compromiso'}.`,
+  ],
+  Inspiracional: [
+    (n,v) => `${n}: Transforma ${v[0]||'tu visión'} en realidad.`,
+    (n,v) => `El ${v[0]||'cambio'} comienza con ${n}.`,
+    (n,v) => `${n}. Donde la ${v[0]||'innovación'} encuentra su propósito.`,
+  ],
+  Disruptivo: [
+    (n,v) => `${n}. Rompe las reglas. Redefine ${v[0]||'todo'}.`,
+    (n,v) => `¿Por qué seguir? ${n} lleva la ${v[0]||'disrupción'} más lejos.`,
+    (n,v) => `${n}: porque el ${v[0]||'dinamismo'} no espera.`,
+  ],
+};
+
+function generateTaglines(name, values, tone) {
+  const templates = taglineTemplates[tone] || taglineTemplates['Inspiracional'];
+  return templates.map(fn => fn(name || 'Tu Marca', values));
+}
+
+/* ══════════════════════════════════════════════
+   RENDER FUNCTIONS
+══════════════════════════════════════════════ */
+function renderPalette(palette) {
+  const names = ['Primario','Secundario','Acento','Neutro Claro','Oscuro'];
+  const container = document.getElementById('paletteContainer');
+  container.innerHTML = '';
+  palette.forEach((hex, i) => {
+    const sw = document.createElement('div');
+    sw.className = 'palette-swatch';
+    sw.title = 'Clic para copiar';
+    sw.innerHTML = `
+      <div class="swatch-circle" style="background:${hex}"></div>
+      <div class="swatch-hex">${hex.toUpperCase()}</div>
+      <div style="font-size:0.65rem;color:var(--text-muted);text-align:center;">${names[i]}</div>
+    `;
+    sw.onclick = () => copyToClipboard(hex.toUpperCase());
+    container.appendChild(sw);
+  });
+}
+
+function renderFonts(fontPairs, palette) {
+  const container = document.getElementById('fontCombos');
+  container.innerHTML = '';
+  const labels = ['Combinación A', 'Combinación B'];
+
+  fontPairs.forEach(([heading, body], i) => {
+    loadGoogleFont(heading);
+    loadGoogleFont(body);
+
+    const card = document.createElement('div');
+    card.className = 'font-card';
+    card.innerHTML = `
+      <div class="font-label">${labels[i]}</div>
+      <div class="font-heading-sample" style="font-family:'${heading}',sans-serif;color:${palette[0]}">
+        Aa Bb Cc 01
+      </div>
+      <div class="font-body-sample" style="font-family:'${body}',sans-serif">
+        El diseño es la diferencia entre un producto que se usa y uno que se ama.
+      </div>
+      <div class="font-names">${heading} + ${body}</div>
+    `;
+    container.appendChild(card);
+  });
+}
+
+function renderTaglines(taglines, tone) {
+  const container = document.getElementById('taglinesList');
+  container.innerHTML = '';
+  const badges = ['⭐ Recomendado', '💡 Alternativa', '🔥 Audaz'];
+  taglines.forEach((t, i) => {
+    const card = document.createElement('div');
+    card.className = 'tagline-card';
+    card.title = 'Clic para copiar';
+    card.innerHTML = `
+      <div class="tagline-text">"${t}"</div>
+      <div class="tagline-badge">${badges[i]}</div>
+    `;
+    card.onclick = () => copyToClipboard(t);
+    container.appendChild(card);
+  });
+}
+
+function renderPreviews(name, industry, palette, fontPairs) {
+  const [p0,p1,p2,p3,p4] = palette;
+  const initial = (name||'M')[0].toUpperCase();
+  const headFont = fontPairs[0][0];
+  const bodyFont = fontPairs[0][1];
+
+  // Business Card
+  const bc = document.getElementById('bizCard');
+  bc.style.background = `linear-gradient(135deg, ${p0} 0%, ${p4} 100%)`;
+  bc.style.color = '#fff';
+  document.getElementById('bcCircle').style.background = p2;
+  document.getElementById('bcName').style.fontFamily = `'${headFont}',sans-serif`;
+  document.getElementById('bcName').textContent = name || 'Tu Empresa';
+  document.getElementById('bcTitle').textContent = industry || 'Industria';
+  document.getElementById('bcContact').innerHTML =
+    `contact@${(name||'empresa').toLowerCase().replace(/\s/g,'')}.com<br>+1 (555) 000-0000<br>www.${(name||'empresa').toLowerCase().replace(/\s/g,'')}.com`;
+
+  // LinkedIn Header
+  const lh = document.getElementById('linkedinHeader');
+  lh.style.background = `linear-gradient(120deg, ${p4} 0%, ${p0} 50%, ${p1} 100%)`;
+  lh.style.color = '#fff';
+  document.getElementById('lhText').textContent = (name || 'TU MARCA').toUpperCase();
+  document.getElementById('lhText').style.fontFamily = `'${headFont}',sans-serif`;
+
+  const shapes = document.getElementById('lhShapes');
+  shapes.innerHTML = '';
+  [[p2,'60px','60px','-20px','-20px'],[p1,'80px','80px','auto','-30px','auto']].forEach(([c,w,h,t,r,l]) => {
+    const s = document.createElement('div');
+    s.className = 'lh-shape';
+    s.style.cssText = `background:${c};width:${w};height:${h};top:${t};right:${r};left:${l||'auto'}`;
+    shapes.appendChild(s);
+  });
+  const s2 = document.createElement('div');
+  s2.className = 'lh-shape';
+  s2.style.cssText = `background:${p2};width:40px;height:40px;bottom:-10px;left:30%`;
+  shapes.appendChild(s2);
+
+  // App Icon
+  const icon = document.getElementById('appIcon');
+  icon.style.background = `linear-gradient(135deg, ${p0}, ${p1})`;
+  icon.style.color = '#fff';
+  icon.style.fontFamily = `'${headFont}',sans-serif`;
+  document.getElementById('iconLetter').textContent = initial;
+
+  // Seal
+  const seal = document.getElementById('sealSvg');
+  const companyName = (name || 'TU MARCA').toUpperCase();
+  const industry2 = (industry || 'BRAND').toUpperCase().slice(0,12);
+
+  seal.innerHTML = `
+    <defs>
+      <path id="topArc" d="M 15,60 A 45,45 0 0,1 105,60"/>
+      <path id="botArc" d="M 105,60 A 45,45 0 0,1 15,60"/>
+    </defs>
+    <circle cx="60" cy="60" r="55" fill="${p0}" />
+    <circle cx="60" cy="60" r="50" fill="none" stroke="${p2}" stroke-width="1.5" stroke-dasharray="4 3"/>
+    <circle cx="60" cy="60" r="38" fill="${p4}" />
+    <text font-family="'${headFont}',sans-serif" font-size="9" font-weight="700" fill="${p3}" letter-spacing="2">
+      <textPath href="#topArc" startOffset="50%" text-anchor="middle">${companyName}</textPath>
+    </text>
+    <text font-family="'${bodyFont}',sans-serif" font-size="7" fill="${p2}" letter-spacing="1.5">
+      <textPath href="#botArc" startOffset="50%" text-anchor="middle">${industry2}</textPath>
+    </text>
+    <text x="60" y="64" text-anchor="middle" font-family="'${headFont}',sans-serif" font-size="22" font-weight="900" fill="${p3}">${initial}</text>
+  `;
+}
+
+/* ══════════════════════════════════════════════
+   COPY
+══════════════════════════════════════════════ */
+function copyToClipboard(text) {
+  navigator.clipboard.writeText(text).catch(() => {
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+  });
+  const toast = document.getElementById('copyToast');
+  toast.classList.add('show');
+  setTimeout(() => toast.classList.remove('show'), 2000);
+}
+
+/* ══════════════════════════════════════════════
+   DOWNLOAD GUIDE (simulated)
+══════════════════════════════════════════════ */
+function downloadGuide() {
+  if (!currentPalette.length) return;
+  const name = document.getElementById('companyName').value || 'Mi Marca';
+  const content = `GUÍA DE IDENTIDAD DE MARCA — ${name.toUpperCase()}
+${'═'.repeat(50)}
+
+PALETA DE COLORES
+─────────────────
+Primario:        ${currentPalette[0]}
+Secundario:      ${currentPalette[1]}
+Acento:          ${currentPalette[2]}
+Neutro Claro:    ${currentPalette[3]}
+Oscuro:          ${currentPalette[4]}
+
+TIPOGRAFÍAS
+─────────────
+Combinación A:   ${currentFonts[0] ? currentFonts[0].join(' + ') : '—'}
+Combinación B:   ${currentFonts[1] ? currentFonts[1].join(' + ') : '—'}
+
+TAGLINES
+─────────
+${Array.from(document.querySelectorAll('.tagline-text')).map((t,i)=>`${i+1}. ${t.textContent}`).join('\n')}
+
+DATOS DE MARCA
+──────────────
+Industria: ${document.getElementById('industry').value || '—'}
+Tono: ${document.querySelector('input[name="tone"]:checked')?.value || '—'}
+Valores: ${getSelectedValues().join(', ') || '—'}
+
+Generado con Brand Identity Generator
+`;
+  const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `${name.toLowerCase().replace(/\s/g,'-')}-brand-guide.txt`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+/* ══════════════════════════════════════════════
+   HELPERS
+══════════════════════════════════════════════ */
+function getSelectedValues() {
+  return Array.from(document.querySelectorAll('#valuesGrid input:checked')).map(i => i.value);
+}
+
+/* ══════════════════════════════════════════════
+   MAIN GENERATE
+══════════════════════════════════════════════ */
+function generate(useNewSeed = true) {
+  const name = document.getElementById('companyName').value.trim();
+  const industry = document.getElementById('industry').value;
+  const hex = document.getElementById('favColor').value;
+  const tone = document.querySelector('input[name="tone"]:checked')?.value || 'Inspiracional';
+  const values = getSelectedValues();
+
+  if (!name) {
+    document.getElementById('companyName').focus();
+    document.getElementById('companyName').style.borderColor = '#ef4444';
+    setTimeout(() => document.getElementById('companyName').style.borderColor = '', 1500);
+    return;
+  }
+
+  if (useNewSeed) variationSeed = Math.floor(Math.random() * 100);
+
+  const btn = document.getElementById('btnGenerate');
+  btn.classList.add('loading');
+  btn.disabled = true;
+
+  setTimeout(() => {
+    btn.classList.remove('loading');
+    btn.disabled = false;
+
+    currentPalette = generatePalette(hex, values, industry, variationSeed);
+    currentFonts = pickFonts(values, variationSeed);
+    const taglines = generateTaglines(name, values, tone);
+
+    renderPalette(currentPalette);
+    renderFonts(currentFonts, currentPalette);
+    renderTaglines(taglines, tone);
+    renderPreviews(name, industry, currentPalette, currentFonts);
+
+    const results = document.getElementById('results');
+    results.classList.add('visible');
+    document.getElementById('actionButtons').style.display = 'flex';
+
+    results.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }, 2000);
+}
+
+function regenerate() {
+  variationSeed = Math.floor(Math.random() * 100);
+  generate(false);
+}
+</script>
+</body>
+</html>
